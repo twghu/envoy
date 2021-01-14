@@ -1232,7 +1232,6 @@ void ServerContextImpl::TlsContext::addClientValidationContext(
       BIO_new_mem_buf(const_cast<char*>(config.caCert().data()), config.caCert().size()));
   RELEASE_ASSERT(bio != nullptr, "");
   // Based on BoringSSL's SSL_add_file_cert_subjects_to_stack().
-  // TODO (dmitri-d) params in X509_NAME_cmp call below look wrong
   bssl::UniquePtr<STACK_OF(X509_NAME)> list(sk_X509_NAME_new(
       [](const X509_NAME* const* a, const X509_NAME* const* b) -> int { return X509_NAME_cmp(*a, *b); }));
   RELEASE_ASSERT(list != nullptr, "");
