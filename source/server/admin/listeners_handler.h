@@ -22,6 +22,10 @@ public:
                                    Http::ResponseHeaderMap& response_headers,
                                    Buffer::Instance& response, AdminStream&);
 
+  Http::Code handlerDrainConnections(absl::string_view path_and_query,
+                                   Http::ResponseHeaderMap& response_headers,
+                                   Buffer::Instance& response, AdminStream&);
+
   Http::Code handlerListenerInfo(absl::string_view path_and_query,
                                  Http::ResponseHeaderMap& response_headers,
                                  Buffer::Instance& response, AdminStream&);

@@ -29,6 +29,18 @@ bool DrainManagerImpl::drainClose() const {
   }
 
   if (!draining_) {
+    // a drain_listeners request should take priority over a drain_connections request.
+    if (drainingConnections() &&
+        server_.listenerManager().numConnections() > drainConnectionsLimit() ) {
+//      std::cout << "------------- CONNECTION DRAIN "
+//                << server_.listenerManager().numConnections()
+//                << " > " << drainConnectionsLimit()
+//                << std::endl << std::flush;
+      // a connection drain limit can still be in effect but
+      // if number of connections < limit then take no action
+      return true;
+    }
+
     return false;
   }
 
@@ -73,6 +85,17 @@ void DrainManagerImpl::startParentShutdownSequence() {
 
   parent_shutdown_timer_->enableTimer(std::chrono::duration_cast<std::chrono::milliseconds>(
       server_.options().parentShutdownTime()));
+}
+
+bool DrainManagerImpl::setConnectionDrainPercentage(uint16_t percentage_of_connections) {
+  // some limit to code as a configuration item?
+  // limit here will prevent overflow
+  if (percentage_of_connections <= 80) {
+    drain_connections_limit_ = (percentage_of_connections * server_.listenerManager().numConnections())/100;
+    return true;
+  }
+
+  return false;
 }
 
 } // namespace Server

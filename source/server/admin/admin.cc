@@ -192,6 +192,8 @@ AdminImpl::AdminImpl(const std::string& profile_path, Server::Instance& server)
            MAKE_ADMIN_HANDLER(stats_handler_.handlerResetCounters), false, true},
           {"/drain_listeners", "drain listeners",
            MAKE_ADMIN_HANDLER(listeners_handler_.handlerDrainListeners), false, true},
+          {"/drain_connections", "drain connections",
+           MAKE_ADMIN_HANDLER(listeners_handler_.handlerDrainConnections), false, true},
           {"/server_info", "print server version/status information",
            MAKE_ADMIN_HANDLER(server_info_handler_.handlerServerInfo), false, false},
           {"/ready", "print server state, return 200 if LIVE, otherwise return 503",

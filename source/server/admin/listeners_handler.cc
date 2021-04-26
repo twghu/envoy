@@ -7,6 +7,7 @@
 #include "common/network/utility.h"
 
 #include "server/admin/utils.h"
+#include "absl/strings/numbers.h"
 
 namespace Envoy {
 namespace Server {
@@ -36,6 +37,25 @@ Http::Code ListenersHandler::handlerDrainListeners(absl::string_view url, Http::
 
   response.add("OK\n");
   return Http::Code::OK;
+}
+
+Http::Code ListenersHandler::handlerDrainConnections(absl::string_view url, Http::ResponseHeaderMap&,
+                                                   Buffer::Instance& response, AdminStream&) {
+  const Http::Utility::QueryParams params = Http::Utility::parseQueryString(url);
+  if (!params.empty()) {
+    uint32_t value = 0;
+    auto percent = params.find("percent");
+    if (percent != params.end() &&
+      absl::SimpleAtoi(percent->second, &value)) {
+      if(server_.drainManager().setConnectionDrainPercentage(value)) {
+        response.add("OK\n");
+        return Http::Code::OK;
+      }
+    }
+  }
+
+  response.add("usage: /drain_connections?percent=value\n");
+  return Http::Code::BadRequest;
 }
 
 Http::Code ListenersHandler::handlerListenerInfo(absl::string_view url,
