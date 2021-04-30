@@ -741,6 +741,7 @@ Http::FilterHeadersStatus Filter::doHeaders(StreamHandleRef& handle,
     handle.markDead();
   } catch (const Filters::Common::Lua::LuaException& e) {
     scriptError(e);
+    status = Http::FilterHeadersStatus::StopIteration;
   }
 
   return status;
@@ -756,6 +757,7 @@ Http::FilterDataStatus Filter::doData(StreamHandleRef& handle, Buffer::Instance&
       handle.markDead();
     } catch (const Filters::Common::Lua::LuaException& e) {
       scriptError(e);
+      //      status = Http::FilterDataStatus::StopIterationAndBuffer;
     }
   }
 
@@ -771,6 +773,7 @@ Http::FilterTrailersStatus Filter::doTrailers(StreamHandleRef& handle, Http::Hea
       handle.markDead();
     } catch (const Filters::Common::Lua::LuaException& e) {
       scriptError(e);
+      //     status = Http::FilterTrailersStatus::StopIteration;
     }
   }
 
@@ -781,6 +784,8 @@ void Filter::scriptError(const Filters::Common::Lua::LuaException& e) {
   scriptLog(spdlog::level::err, e.what());
   request_stream_wrapper_.reset();
   response_stream_wrapper_.reset();
+  decoder_callbacks_.callbacks_->sendLocalReply(Http::Code::InternalServerError, e.what(), nullptr,
+                                                absl::nullopt, e.what());
 }
 
 void Filter::scriptLog(spdlog::level::level_enum level, const char* message) {
